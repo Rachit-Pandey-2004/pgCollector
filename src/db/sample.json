@@ -1,0 +1,23 @@
+{'pokemons': [
+    {'pokemon_id': 187, 
+    'lat': 1.36393736, 
+    'lng': 103.82882642, 
+    'despawn': 1737830698, 
+    'inserted': 1737829499, 
+    'disguise': 0, 
+    'cp': 411, 
+    'attack': 15, 
+    'defence': 15, 
+    'stamina': 15, 
+    'move1': 271, 
+    'move2': 272, 
+    'costume': -1, 
+    'gender': 1, 
+    'shiny': 0, 
+    'form': 1205, 
+    'level': 24, 
+    'weather': 0, 
+    'size': 3, 
+    'mighty': 0, 
+    'm': '13691'
+    }, {'pokemon_id': 410, 'lat': 1.25510099, 'lng': 103.82384502, 'despawn': 1737830428, 'inserted': 1737829857, 'disguise': 0, 'cp': 559, 'attack': 15, 'defence': 15, 'stamina': 15, 'move1': 266, 'move2': 268, 'costume': -1, 'gender': 1, 'shiny': 0, 'form': -1, 'level': 22, 'weather': 0, 'size': 3, 'mighty': 0, 'm': '6336'}, {'pokemon_id': 511, 'lat': 1.38371975, 'lng': 103.76734168, 'despawn': 1737830568, 'inserted': 1737829370, 'disguise': 0, 'cp': 573, 'attack': 15, 'defence': 15, 'stamina': 15, 'move1': 220, 'move2': 273, 'costume': -1, 'gender': 1, 'shiny': 0, 'form': -1, 'level': 21, 'weather': 0, 'size': 3, 'mighty': 0, 'm': '16756'}], 'meta': {'inserted': 1737830187, 'time': 1737830196}, 'weathers': [{'cell_id': '3592250722990686208', 'weather': 4}, {'cell_id': '3592208941548830720', 'weather': 4}, {'cell_id': '3592222135688364032', 'weather': 4}, {'cell_id': '3592200145455808512', 'weather': 4}, {'cell_id': '3592202344479064064', 'weather': 4}, {'cell_id': '3592213339595341824', 'weather': 4}, {'cell_id': '3592211140572086272', 'weather': 4}, {'cell_id': '3592204543502319616', 'weather': 4}, {'cell_id': '3592206742525575168', 'weather': 4}, {'cell_id': '3592248523967430656', 'weather': 4}, {'cell_id': '3592197946432552960', 'weather': 4}, {'cell_id': '3592252922013941760', 'weather': 4}, {'cell_id': '3592189150339530752', 'weather': 4}, {'cell_id': '3592215538618597376', 'weather': 4}, {'cell_id': '3592217737641852928', 'weather': 4}, {'cell_id': '3592224334711619584', 'weather': 4}, {'cell_id': '3592191349362786304', 'weather': 4}, {'cell_id': '3592193548386041856', 'weather': 4}, {'cell_id': '3592303499548819456', 'weather': 2}]}

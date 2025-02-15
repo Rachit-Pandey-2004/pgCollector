@@ -1,0 +1,8 @@
+{
+    "python.analysis.extraPaths": [
+        "./src/db"
+    ],
+    "files.associations": {
+        "threads.h": "c"
+    }
+}
