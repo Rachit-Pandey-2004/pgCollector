@@ -52,7 +52,7 @@ class Pogocity:
                 else :
                     gender="N"
                 #(id, p_name, cp, lvl, gender, iv, coordinates, despawn)
-                data.append((li['pokemon_id'],name.lower(),li['cp'],li['level'],gender.upper(),iv,li["lat"],li['lng'],(li["despawn"])))
+                data.append((li['pokemon_id'],name.lower(),li['cp'],li['level'],gender.upper(),iv,li['lng'],li["lat"],(li["despawn"])))
             await self.psql.insert_mass_data(data)
         except Exception as e:
             print("ERROR while writing at database %s"%e)
@@ -94,4 +94,5 @@ class Pogocity:
 async def test():
     async with Pogocity()as pgct:
         await pgct.all_monster()
-# asyncio.run(test())
+if __name__=="__main__":
+    asyncio.run(test())

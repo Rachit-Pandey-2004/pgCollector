@@ -1,3 +1,8 @@
+'''
+Note: postgis stores the coordinates in lon, lat fashion
+so follow that format in whole code
+ranges lat(+/-90) lon(+/-180)
+'''
 import asyncio
 from asyncpg import exceptions, create_pool
 from socket import gaierror
@@ -16,7 +21,8 @@ class PGDB:
                 self.db_config[items[0]] = items[1]
         else: 
             raise Exception("Section {0} not found in the {1} file".format(section, filename))
-        asyncio.create_task(self._cleaner_loop())
+        if PGDB._task is None:
+            PGDB._task = asyncio.create_task(self._cleaner_loop())
         
     async def __aenter__(self):
         connection_successful = await self.__Stablish_Connection()
@@ -87,7 +93,7 @@ class PGDB:
                     PRIMARY KEY(s_no)
                     );
                     CREATE INDEX IF NOT EXISTS idx_coordinates ON pokemon_coords USING GIST (coordinates);
-                    CREATE UNIQUE INDEX IF NOT EXISTS unique_pokemon_spawn ON pokemon_coords 
+                    CREATE UNIQUE INDEX IF NOT EXISTS unique_pokemon_spawn ON pokemon_coords
                     (id, p_name, ROUND(CAST(ST_X(coordinates::geometry) AS NUMERIC), 5),
                     ROUND(CAST(ST_Y(coordinates::geometry) AS NUMERIC), 5));
                     """
@@ -149,10 +155,23 @@ class PGDB:
         except Exception as e:
             print("struck with an failure while writing logging the data is not set yet...\n%s"%e)
             return False
-
-async def test():
-    async with PGDB() as pq:
-        pass
+    async def test_retrieve(self)->None:
+        try:
+            print("on retriving data")
+            async with self.pool.acquire() as conn:
+                val=await conn.fetchrow("""
+                                    SELECT id, p_name, ST_AsText(coordinates) FROM pokemon_coords;
+                                    """)
+                print(val)
+        except Exception as e:
+            print("struck with an failure while writing logging the data is not set yet...\n%s"%e)
+            return False
         
+async def test():
+    async with PGDB() as psql:
+        data=(396, 'starly', 657, 34, 'M', 100.0, 24.032733, 120.529658, 1739718378)
+        await psql.insert_single_data(data)
+        await psql.test_retrieve()
 
-    
+if __name__=="__main__":
+    asyncio.run(test())
