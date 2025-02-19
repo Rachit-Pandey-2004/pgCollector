@@ -1,7 +1,10 @@
 '''
 Note: postgis stores the coordinates in lon, lat fashion
-so follow that format in whole code
+so the db will handle that sequencing
 ranges lat(+/-90) lon(+/-180)
+
+postgres stores time in utc if system timezone is not define then the time passedd will be treated as utc time
+for ist - (5 * 3600 + 30 * 60) =utc
 '''
 import asyncio
 from asyncpg import exceptions, create_pool
@@ -11,6 +14,7 @@ from configparser import ConfigParser
 from os import getcwd
 
 class PGDB:
+    _task=None
     def __init__(self, filename="%s/src/db/config.ini"%getcwd(), section="postgresql") -> None:
         parser = ConfigParser()
         parser.read(filename)
@@ -117,7 +121,8 @@ class PGDB:
             print("FAILURE IN CLEANING SEQUENCE \n %s"%e)
 
     async def _cleaner_loop(self):
-        await asyncio.sleep(400)
+        print("cleaner loaded successfully ...")
+        await asyncio.sleep(10)
         while True:
             await asyncio.sleep(60)
             await self.__cleaning_sequence()
@@ -128,7 +133,7 @@ class PGDB:
                 await conn.execute(
                     '''
                     INSERT INTO pokemon_coords(id, p_name, cp, lvl, gender, iv, coordinates, despawn)
-                    VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326), to_timestamp($9))
+                    VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($8, $7), 4326), to_timestamp($9))
                     ON CONFLICT (id, p_name, ROUND(CAST(ST_X(coordinates::geometry) AS NUMERIC), 5),
                                ROUND(CAST(ST_Y(coordinates::geometry) AS NUMERIC), 5))
                     DO NOTHING
@@ -146,7 +151,7 @@ class PGDB:
             async with self.pool.acquire() as conn:
                 await conn.executemany("""
                     INSERT INTO pokemon_coords(id, p_name, cp, lvl, gender, iv, coordinates, despawn) 
-                    VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326), to_timestamp($9))      
+                    VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($8, $7), 4326), to_timestamp($9))
                     ON CONFLICT (id, p_name, ROUND(CAST(ST_X(coordinates::geometry) AS NUMERIC), 5),
                                ROUND(CAST(ST_Y(coordinates::geometry) AS NUMERIC), 5))
                     DO NOTHING             
@@ -160,7 +165,7 @@ class PGDB:
             print("on retriving data")
             async with self.pool.acquire() as conn:
                 val=await conn.fetchrow("""
-                                    SELECT id, p_name, ST_AsText(coordinates) FROM pokemon_coords;
+                                    SELECT id, p_name, ST_AsText(coordinates),EXTRACT(EPOCH FROM despawn) AS despawn_timestamp FROM pokemon_coords;
                                     """)
                 print(val)
         except Exception as e:

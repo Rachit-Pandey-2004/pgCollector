@@ -97,7 +97,7 @@ class TeleScan:
             despawn_time = current_time + total_seconds 
             id=(self.mons).index(name)+1
             #(id, p_name, cp, lvl, gender, iv, coordinates, despawn)
-            insert_data=(id,name.lower(),int(cp),int(lvl),gender.upper(),int(iv),float(coords.group(2)),float(coords.group(1)),despawn_time)
+            insert_data=(id,name.lower(),int(cp),int(lvl),gender.upper(),int(iv),float(coords.group(1)),float(coords.group(2)),despawn_time)
             print("@@ cea bot")
             try:
                 print(insert_data)
@@ -138,7 +138,7 @@ class TeleScan:
             # Generate unique id (assuming CP as a placeholder, this may need modification)
             id=(self.mons).index(p_name)+1
             #(id, p_name, cp, lvl, gender, iv, coordinates, despawn)
-            insert_data=(id,p_name.lower(),int(cp),int(level),gender.upper(),iv,float(lon),float(lat),despawn_time)
+            insert_data=(id,p_name.lower(),int(cp),int(level),gender.upper(),iv,float(lat),float(lon),despawn_time)
             print(insert_data)
             try:
                 print(insert_data)

@@ -1,3 +1,4 @@
 test.py
 src/pogoMaps/configs/anon.session
+src/pogoMaps/configs/anon.session-journal
 src/pogoMaps/configs/credentials.yaml
