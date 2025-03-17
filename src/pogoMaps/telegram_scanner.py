@@ -8,7 +8,7 @@ from json import loads
 from sys import path
 path.insert(0,"%s/src/db"%getcwd())
 
-from dbCollector import PGDB 
+from MonsDB import PGDB 
 print("Telegram Scanner is ready")
 
 class TeleScan:

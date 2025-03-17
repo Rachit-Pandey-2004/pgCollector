@@ -1,3 +1,8 @@
+'''
+This script has raids and dynamax battel data so we need two different db to store the essential data
+'''
+
+
 from sys import path
 from os import getcwd
 import asyncio
@@ -7,7 +12,7 @@ from time import time
 import aiohttp
 path.insert(0,"%s/src/db"%getcwd())
 
-from dbCollector import PGDB 
+from MonsDB import PGDB 
 
 class Pogocity:
     __endpoint = []
@@ -36,21 +41,7 @@ class Pogocity:
         data=[]
         #at present due to raid hour no filter is there for eggs
         try:
-            for li in val["raids"]:
-                name=self.mon_names[int(li['pokemon_id'])-1]
-                if iv<0:iv=-1
-                if li['gender']==0 :
-                    gender='N'
-                elif li['gender']==1 or '♂' in name:
-                    gender='M'
-                elif li["gender"]==2 or '♀' in name:
-                    gender='F'
-                else :
-                    gender="N"
-                #(id, p_name, cp, lvl, gender, iv, coordinates, despawn)
-                data.append((li['pokemon_id'],name.lower(),li['cp'],li['level'],gender.upper(),li["lat"],li['lng'],(li["despawn"])))
-            print(data)
-            await self.psql.insert_mass_data(data)
+            print(val)
         except Exception as e:
             print("ERROR while writing at database %s"%e)
 

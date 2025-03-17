@@ -7,7 +7,7 @@ from time import time
 import aiohttp
 path.insert(0,"%s/src/db"%getcwd())
 
-from dbCollector import PGDB 
+from MonsDB import PGDB 
 
 class Pogocity:
     __endpoint = []
