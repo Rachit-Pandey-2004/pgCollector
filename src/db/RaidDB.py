@@ -1,4 +1,28 @@
+'''
+https://pgtools.net/raids
+this website will also give raids data...
+
+Team details
+0 : no team
+1 : mystic
+2 : valor
+3 : instinct
+pokemon_id = 0: eggs
+
+var raidLevels = ['egg', 'boss', '1', '11', '2', '3', '13', '4', '5', '15', '6', '9', '101', '102', '103', '104', '105', '106', 
+                    '107', 'mystic', 'valor', 'instinct', 'exraid', 'boosted' ;
+Shadow raids level = 11, 13, 15 (for exact lvl -10)
+6 : mega raid
+9 : elite raid
+101 to 106 : max raids
+107 : gigantamax raids
+    
+Gender:
+1 = Male, 2 = Female, 3= Unknown
+'''
+
 import asyncio
+
 from asyncpg import exceptions, create_pool
 from socket import gaierror
 from datetime import datetime
@@ -80,26 +104,29 @@ class RGDB:
                         gym_name VARCHAR(255) NOT NULL,
                         ex_raid_eligible BOOLEAN NOT NULL DEFAULT FALSE,
                         sponsor BOOLEAN NOT NULL DEFAULT FALSE,
-                        location GEOGRAPHY(POINT, 4326) NOT NULL,  -- PostGIS spatial data type
+                        location GEOGRAPHY(POINT, 4326) NOT NULL UNIQUE,  -- PostGIS spatial data type
                         raid_spawn TIMESTAMP NOT NULL,
                         raid_start TIMESTAMP NOT NULL,
                         raid_end TIMESTAMP NOT NULL,
                         pokemon_id INT NOT NULL DEFAULT 0,
-                        level INT NOT NULL CHECK (level BETWEEN 1 AND 5),
+                        level INT NOT NULL,
                         cp INT NOT NULL DEFAULT -1,
                         team INT NOT NULL CHECK (team BETWEEN 0 AND 3),  -- 0 = Neutral, 1 = Mystic, 2 = Valor, 3 = Instinct
                         move1 INT NOT NULL DEFAULT -1,
                         move2 INT NOT NULL DEFAULT -1,
                         is_exclusive BOOLEAN NOT NULL DEFAULT FALSE,
                         form INT NOT NULL DEFAULT 0,
-                        gender INT NOT NULL CHECK (gender BETWEEN 0 AND 2)  -- 0 = Unknown, 1 = Male, 2 = Female
+                        gender INT NOT NULL CHECK (gender BETWEEN -1 AND 3)  -- 3= Unknown, 1 = Male, 2 = Female
                     );
-                    
+                    CREATE UNIQUE INDEX IF NOT EXISTS unique_raid_spawn ON raid_coords
+                    (gym_name, raid_start, 
+                     ROUND(CAST(ST_X(location::geometry) AS NUMERIC), 5), 
+                     ROUND(CAST(ST_Y(location::geometry) AS NUMERIC), 5));
                     -- Indexes for performance optimization
-                    CREATE INDEX idx_gym_location ON gym_raids USING GIST (location); -- Spatial index for fast geo queries
-                    CREATE INDEX idx_raid_time ON gym_raids (raid_start, raid_end); -- Index for filtering by raid times
-                    CREATE INDEX idx_pokemon_level ON gym_raids (pokemon_id, level); -- Optimize Pokémon-based searches
-                    CREATE INDEX idx_team ON gym_raids (team); -- Optimize team-based lookups
+                    CREATE INDEX idx_gym_location ON raid_coords USING GIST (location); -- Spatial index for fast geo queries
+                    CREATE INDEX idx_raid_time ON raid_coords (raid_start, raid_end); -- Index for filtering by raid times
+                    CREATE INDEX idx_pokemon_level ON raid_coords (pokemon_id, level); -- Optimize Pokémon-based searches
+                    CREATE INDEX idx_team ON raid_coords (team); -- Optimize team-based lookups
                     """
                 )
                 print("Successfully table was created...")
@@ -112,7 +139,7 @@ class RGDB:
             async with self.pool.acquire() as conn:
                 await conn.execute(
                     """
-                    DELETE FROM raid_coords WHERE raid_end < NOW();
+                    DELETE FROM  raid_coords WHERE raid_end < NOW();
                     """
                 )
                 print("cleaning sequence executes sucessfully")
@@ -130,20 +157,35 @@ class RGDB:
         try:
             async with self.pool.acquire() as conn:
                 await conn.executemany("""
-                    INSERT INTO gym_raids (
+                    INSERT INTO  raid_coords(
                         gym_name, ex_raid_eligible, sponsor, location, 
                         raid_spawn, raid_start, raid_end, pokemon_id, 
                         level, cp, team, move1, move2, is_exclusive, form, gender
                     ) VALUES (
                         $1, $2, $3, ST_SetSRID(ST_MakePoint($5, $4), 4326),
                         to_timestamp($6), to_timestamp($7), to_timestamp($8),
-                        $9, $10, $11, $12, $13, $14, $15, $16
+                        $9, $10, $11, $12, $13, $14, $15, $16, $17
                     )
-                    ON CONFLICT (gym_name, ROUND(CAST(ST_X(location::geometry) AS NUMERIC), 5),
-                                ROUND(CAST(ST_Y(location::geometry) AS NUMERIC), 5), raid_start)
-                    DO NOTHING
+                    ON CONFLICT (gym_name, raid_start, 
+             ROUND(CAST(ST_X(location::geometry) AS NUMERIC), 5), 
+             ROUND(CAST(ST_Y(location::geometry) AS NUMERIC), 5)) 
+             DO NOTHING;
                 """, data)
                 return True
         except Exception as e:
             print(f"Failed to insert raid data: {e}")
             return False
+
+       
+async def test():
+    async with RGDB() as psql:
+        data = [
+    ("Submarine Mural", False, False, 1.372145, 103.949959, 1742180085, 1742183685, 1742186385, 
+     0, 5, -1, 3, -1, -1, False, 0, 0),
+    ("Ocean View Gym", False, True, 1.374500, 103.951200, 1742190000, 1742193600, 1742196300,
+     150, 5, 3200, 2, 120, 80, False, 1, 1)
+]
+        await psql.insert_mass_data(data)
+
+if __name__=="__main__":
+    asyncio.run(test())
